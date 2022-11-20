@@ -69,17 +69,17 @@ namespace RestAssured.Request.Builders
         /// <summary>
         /// Authentication details to be added when sending the request.
         /// </summary>
-        public AuthenticationHeaderValue AuthenticationHeader { get; set; }
+        public AuthenticationHeaderValue? AuthenticationHeader { get; set; }
 
         /// <summary>
         /// The value for the Content-Type header when sending the request.
         /// </summary>
-        public string ContentType { get; set; }
+        public string? ContentType { get; set; }
 
         /// <summary>
         /// The value for the content encoding when sending the request.
         /// </summary>
-        public Encoding ContentEncoding { get; set; }
+        public Encoding? ContentEncoding { get; set; }
 
         /// <summary>
         /// When set to true, disables SSL validation on the requests that use this specification.
@@ -101,7 +101,7 @@ namespace RestAssured.Request.Builders
         /// <param name="contentType">The Content-Type header value to set for this request.</param>
         /// <param name="contentEncoding">The content encoding to use in this request.</param>
         /// <param name="useRelaxedHttpsValidation">Flag indicating whether or not to disable SSL checks.</param>
-        public RequestSpecification(string scheme, string host, int port, string basePath, TimeSpan? timeout, ProductInfoHeaderValue? userAgent, IWebProxy proxy, Dictionary<string, object> headers, AuthenticationHeaderValue authenticationHeader, string contentType, Encoding contentEncoding, bool useRelaxedHttpsValidation)
+        public RequestSpecification(string scheme, string host, int port, string basePath, TimeSpan? timeout, ProductInfoHeaderValue? userAgent, IWebProxy? proxy, Dictionary<string, object> headers, AuthenticationHeaderValue? authenticationHeader, string? contentType, Encoding? contentEncoding, bool useRelaxedHttpsValidation)
         {
             this.Scheme = scheme;
             this.HostName = host;

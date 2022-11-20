@@ -67,13 +67,13 @@ namespace RestAssured.Request
         /// <exception cref="HttpRequestProcessorException">Thrown whenever the HTTP request fails.</exception>
         public async Task<VerifiableResponse> Send(HttpRequestMessage request, CookieCollection cookieCollection)
         {
-            foreach (Cookie cookie in cookieCollection)
+            foreach (Cookie? cookie in cookieCollection)
             {
                 // The domain for a cookie cannot be empty, so set it to the hostname for
                 // the request if it has not been set already
-                if (cookie.Domain == null || cookie.Domain == string.Empty)
+                if (cookie != null && cookie.Domain == string.Empty)
                 {
-                    cookie.Domain = request.RequestUri.Host;
+                    cookie.Domain = request.RequestUri?.Host;
                 }
             }
 

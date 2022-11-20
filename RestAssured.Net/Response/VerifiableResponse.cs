@@ -156,18 +156,15 @@ namespace RestAssured.Response
         /// <exception cref="AssertionException">Thrown when the header does not exist, or when the header value does not equal the supplied expected value.</exception>
         public VerifiableResponse Header(string name, IMatcher<string> matcher)
         {
-            IEnumerable<string> values;
-
-            if (this.response.Headers.TryGetValues(name, out values))
-            {
-                if (!matcher.Matches(values.First()))
-                {
-                    throw new ResponseVerificationException($"Expected value for response header with name '{name}' to match '{matcher}', but was '{values.First()}'.");
-                }
-            }
-            else
+            if (!this.response.Headers.TryGetValues(name, out var values))
             {
                 throw new ResponseVerificationException($"Expected header with name '{name}' to be in the response, but it could not be found.");
+            }
+
+            var headers = values as string[] ?? values.ToArray();
+            if (!matcher.Matches(headers.First()))
+            {
+                throw new ResponseVerificationException($"Expected value for response header with name '{name}' to match '{matcher}', but was '{headers.First()}'.");
             }
 
             return this;
@@ -263,7 +260,7 @@ namespace RestAssured.Response
             string responseBodyAsString = this.response.Content.ReadAsStringAsync().Result;
 
             // Look at the response Content-Type header to determine how to deserialize
-            string responseMediaType = this.response.Content.Headers.ContentType.MediaType ?? string.Empty;
+            string responseMediaType = this.response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
             if (responseMediaType.Equals(string.Empty) || responseMediaType.Contains("json"))
             {
@@ -327,7 +324,7 @@ namespace RestAssured.Response
             string responseBodyAsString = this.response.Content.ReadAsStringAsync().Result;
 
             // Look at the response Content-Type header to determine how to deserialize
-            string responseMediaType = this.response.Content.Headers.ContentType.MediaType ?? string.Empty;
+            string responseMediaType = this.response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
             if (responseMediaType.Equals(string.Empty) || responseMediaType.Contains("json"))
             {
@@ -351,7 +348,7 @@ namespace RestAssured.Response
                 XmlNodeList? xmlElements = xmlDoc.SelectNodes(path);
 
                 // Try and cast the element values to an object of the type used in the matcher
-                foreach (XmlNode xmlElement in xmlElements)
+                foreach (XmlNode? xmlElement in xmlElements)
                 {
                     try
                     {
@@ -360,7 +357,7 @@ namespace RestAssured.Response
                     }
                     catch (FormatException)
                     {
-                        throw new ResponseVerificationException($"Response element value {xmlElement.InnerText} cannot be converted to object of type {typeof(T)}");
+                        throw new ResponseVerificationException($"Response element value {xmlElement?.InnerText} cannot be converted to object of type {typeof(T)}");
                     }
                 }
 
@@ -405,7 +402,7 @@ namespace RestAssured.Response
         /// <returns>The current <see cref="VerifiableResponse"/> object.</returns>
         public VerifiableResponse MatchesJsonSchema(JSchema jsonSchema)
         {
-            string responseMediaType = this.response.Content.Headers.ContentType.MediaType ?? string.Empty;
+            string responseMediaType = this.response.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
             if (!responseMediaType.Contains("json"))
             {
@@ -427,7 +424,7 @@ namespace RestAssured.Response
         /// </summary>
         /// <param name="type">The object type to deserialize into.</param>
         /// <returns>The deserialized response object.</returns>
-        public object As(Type type)
+        public object? As(Type type)
         {
             string responseBodyAsString = this.response.Content.ReadAsStringAsync().Result;
 
@@ -437,15 +434,18 @@ namespace RestAssured.Response
             }
 
             // Look at the response Content-Type header to determine how to deserialize
-            string responseMediaType = this.response.Content.Headers.ContentType.MediaType;
+            string? responseMediaType = this.response.Content.Headers.ContentType?.MediaType;
 
             if (responseMediaType == null || responseMediaType.Contains("json"))
             {
+                // Todo: Calling .result directly is not threat safe!!! This can cause unpredictable behavior when executing things in parallel.!
                 return JsonConvert.DeserializeObject(this.response.Content.ReadAsStringAsync().Result, type) ?? string.Empty;
             }
             else if (responseMediaType.Contains("xml"))
             {
                 XmlSerializer xmlSerializer = new XmlSerializer(type);
+
+                // Todo: Calling .result directly is not threat safe!!! This can cause unpredictable behavior when executing things in parallel.
                 using (TextReader reader = new StringReader(this.response.Content.ReadAsStringAsync().Result))
                 {
                     return xmlSerializer.Deserialize(reader);

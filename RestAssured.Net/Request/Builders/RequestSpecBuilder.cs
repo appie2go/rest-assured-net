@@ -28,25 +28,25 @@ namespace RestAssured.Request.Builders
     {
         private readonly RequestSpecification requestSpecification;
 
-        private readonly string scheme = "http";
-        private readonly string host = "localhost";
-        private readonly int port = -1;  // -1 means the default port for the scheme will be chosen
-        private readonly string basePath = string.Empty;
-        private readonly TimeSpan? timeout;
-        private readonly ProductInfoHeaderValue? userAgent;
-        private readonly IWebProxy? proxy;
-        private readonly Dictionary<string, object> headers = new Dictionary<string, object>();
-        private readonly AuthenticationHeaderValue? authenticationHeader;
-        private readonly string? contentTypeHeader = null;
-        private readonly Encoding? contentEncoding = null;
-        private readonly bool useRelaxedHttpsValidation = false;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RequestSpecBuilder"/> class.
         /// </summary>
         public RequestSpecBuilder()
         {
-            this.requestSpecification = new RequestSpecification(this.scheme, this.host, this.port, this.basePath, this.timeout, this.userAgent, this.proxy, this.headers, this.authenticationHeader, this.contentTypeHeader, this.contentEncoding, this.useRelaxedHttpsValidation);
+            const string scheme = "http";
+            const string host = "localhost";
+            const int port = -1;  // -1 means the default port for the scheme will be chosen
+            var basePath = string.Empty;
+            TimeSpan? timeout = null;
+            ProductInfoHeaderValue? userAgent = null;
+            IWebProxy? proxy = null;
+            var headers = new Dictionary<string, object>();
+            AuthenticationHeaderValue? authenticationHeader = null;
+            string? contentTypeHeader = null;
+            Encoding? contentEncoding = null;
+            const bool useRelaxedHttpsValidation = false;
+
+            this.requestSpecification = new RequestSpecification(scheme, host, port, basePath, timeout, userAgent, proxy, headers, authenticationHeader, contentTypeHeader, contentEncoding, useRelaxedHttpsValidation);
         }
 
         /// <summary>
@@ -56,6 +56,11 @@ namespace RestAssured.Request.Builders
         /// <returns>The current <see cref="RequestSpecBuilder"/> object.</returns>
         public RequestSpecBuilder WithScheme(string scheme)
         {
+            if (string.IsNullOrEmpty(scheme))
+            {
+                throw new ArgumentException("Parameter must have a value", nameof(scheme));
+            }
+
             this.requestSpecification.Scheme = scheme;
             return this;
         }

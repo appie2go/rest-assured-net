@@ -492,14 +492,14 @@ namespace RestAssured.Request
 
             try
             {
-                Task<VerifiableResponse> task = httpRequestProcessor.Send(this.request, this.cookieCollection);
+                var task = httpRequestProcessor.Send(this.request, this.cookieCollection);
                 return task.Result;
             }
             catch (AggregateException ae)
             {
-                if (ae.InnerException.GetType() == typeof(TaskCanceledException))
+                if (ae.InnerException?.GetType() == typeof(TaskCanceledException))
                 {
-                    throw new HttpRequestProcessorException($"Request timeout of {this.timeout ?? this.requestSpecification.Timeout ?? TimeSpan.FromSeconds(100)} exceeded.");
+                    throw new HttpRequestProcessorException($"Request timeout of {this.timeout ?? this.requestSpecification?.Timeout ?? TimeSpan.FromSeconds(100)} exceeded.");
                 }
 
                 throw new HttpRequestProcessorException($"Unhandled exception {ae.Message}");
